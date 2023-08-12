@@ -7,6 +7,9 @@ This project is a simple web application that allows users to interact with an E
 
 ## Getting Started
 
+1. base.sol deploy to any Blockchain
+2. index.html to intrect with the contract on frontend
+
 To use this application, you'll need to have the MetaMask browser extension installed. Make sure you're connected to an Ethereum wallet through MetaMask.
 
 ### Installation
