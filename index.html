@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Converter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    h2 {
+      margin-top: 20px;
+    }
+
+    button {
+      display: block;
+      margin: 10px auto;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    input[type="number"],
+    input[type="text"] {
+      display: block;
+      margin: 10px auto;
+      padding: 5px;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    p {
+      margin-top: 10px;
+    }
+
+    #Wallet {
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Converter</h1>
+
+  <button id="connectWallet">Connect Wallet with MetaMask</button>
+  <p id="Wallet"></p>
+
+  <h2>Store Uint</h2>
+  <input type="number" id="numInput" placeholder="Enter a number">
+  <button id="storeButton">Store Uint</button>
+
+  <h2>Get Stored Uint as Hex</h2>
+  <button id="getStoredUintToHex">Get Stored Uint as Hex</button>
+  <p id="storedUintToHex"></p>
+
+  <h2>Convert String to Hex</h2>
+  <input type="text" id="stringInput" placeholder="Enter a string">
+  <button id="convertStringToHex">Convert to Hex</button>
+  <p id="stringToHexResult"></p>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.5.2/web3.min.js"></script>
+  <script>
+    const contractAddress = '0xebD976E6bB2c033EA58dB93b8Ce256A34445daCF';
+    const abi = [{"inputs": [{"internalType": "uint256", "name": "num", "type": "uint256"}], "name": "store", "outputs": [], "stateMutability": "nonpayable", "type": "function"}, {"inputs": [], "name": "storedUintToHex", "outputs": [{"internalType": "bytes", "name": "", "type": "bytes"}], "stateMutability": "view", "type": "function"}, {"inputs": [{"internalType": "string", "name": "_i", "type": "string"}], "name": "stringToHex", "outputs": [{"internalType": "bytes", "name": "", "type": "bytes"}], "stateMutability": "view", "type": "function"}];
+
+    let web3;
+    let contract;
+
+    async function init() {
+      if (window.ethereum) {
+        web3 = new Web3(window.ethereum);
+        try {
+          await window.ethereum.enable();
+          contract = new web3.eth.Contract(abi, contractAddress);
+          console.log("Web3 and contract initialized");
+          const accounts = await web3.eth.getAccounts();
+          web3.eth.defaultAccount = accounts[0];
+          document.getElementById("Wallet").innerText = `Connected: ${web3.eth.defaultAccount}`;
+        } catch (error) {
+          console.error("Failed to initialize web3 or contract:", error);
+        }
+      } else {
+        console.error("Metamask not found. Please install it.");
+        alert("Metamask not found. Please install it.");
+      }
+    }
+    init();
+    document.getElementById("connectWallet").addEventListener("click", async () => {
+      await init();
+      alert("Wallet connected!");
+    });
+
+    document.getElementById("storeButton").addEventListener("click", async () => {
+      const num = document.getElementById("numInput").value;
+      if (contract) {
+        try {
+          await contract.methods.store(num).send({from: web3.eth.defaultAccount});
+          console.log("Uint stored successfully");
+        } catch (error) {
+          console.error("Failed to store uint:", error);
+        }
+      } else {
+        console.error("Contract not initialized.");
+      }
+    });
+
+    document.getElementById("getStoredUintToHex").addEventListener("click", async () => {
+      if (contract) {
+        try {
+          const result = await contract.methods.storedUintToHex().call();
+          document.getElementById("storedUintToHex").innerText = `Stored Uint as Hex: ${result}`;
+        } catch (error) {
+          console.error("Failed to get stored uint as hex:", error);
+        }
+      } else {
+        console.error("Contract not initialized.");
+      }
+    });
+
+    document.getElementById("convertStringToHex").addEventListener("click", async () => {
+      const inputString = document.getElementById("stringInput").value;
+      if (contract) {
+        try {
+          const result = await contract.methods.stringToHex(inputString).call();
+          document.getElementById("stringToHexResult").innerText = `String as Hex: ${result}`;
+        } catch (error) {
+          console.error("Failed to convert string to hex:", error);
+        }
+      } else {
+        console.error("Contract not initialized.");
+      }
+    });
+  </script>
+</body>
+
+</html>
